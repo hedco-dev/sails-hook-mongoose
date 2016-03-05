@@ -8,15 +8,17 @@ module.exports = function(sails) {
   let path              = require('path');
   let db                = mongoose.connection;
   let Schema            = global.Schema = mongoose.Schema;
+  let promise           = require('bluebird');
+
+  promise.promisifyAll(mongoose);
+
   Schema.createObjectId = function() {
     return mongoose.Types.ObjectId();
   };
 
   Schema.castToObjectId = function(stringObjectid) {
     return mongoose.Types.ObjectId(stringObjectid);
-  };
-
-  mongoose.Promise  = require('bluebird');
+  };  
 
   let hook          = {
     defaults: {
