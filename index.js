@@ -2,15 +2,14 @@
 
 module.exports = function(sails) {
 
-  let async             = require('async');
-  let utils             = require('./utils.js');
-  let mongoose          = require('mongoose');
-  let path              = require('path');
-  let db                = mongoose.connection;
-  let Schema            = global.Schema = mongoose.Schema;
-  let promise           = require('bluebird');
+  let async        = require('async');
+  let utils        = require('./utils.js');
+  let mongoose     = require('mongoose');
+  let path         = require('path');
+  let db           = mongoose.connection;
+  let Schema       = global.Schema = mongoose.Schema;  
+  mongoose.Promise = require('bluebird');
 
-  promise.promisifyAll(mongoose);
 
   Schema.createObjectId = function() {
     return mongoose.Types.ObjectId();
@@ -18,7 +17,7 @@ module.exports = function(sails) {
 
   Schema.castToObjectId = function(stringObjectid) {
     return mongoose.Types.ObjectId(stringObjectid);
-  };  
+  };
 
   let hook          = {
     defaults: {
