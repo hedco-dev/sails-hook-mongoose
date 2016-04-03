@@ -26,6 +26,11 @@ let createModel = function(modelDefinition, modelName, mongoose, Schema) {
   modelSchema.methods.toJSON = function() {
     let obj = this.toObject();
     delete obj.__v;
+
+    if (obj._id) {
+      obj.id = obj._id.toString();
+    }
+
     return obj;
   };
 
