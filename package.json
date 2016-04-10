@@ -11,35 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://git.hedcoint.com/dev/sails-hook-mongoose.git"
+    "url": "git@github.com:hedco-dev/sails-hook-mongoose.git"
   },
   "author": "HEDCo - Software Department",
   "license": "ISC",
-  "jshintConfig": {
-    "node": true,
-    "esnext": true,
-    "bitwise": true,
-    "camelcase": true,
-    "curly": true,
-    "eqeqeq": true,
-    "immed": true,
-    "indent": 2,
-    "newcap": true,
-    "noarg": true,
-    "quotmark": "single",
-    "regexp": true,
-    "undef": true,
-    "unused": true,
-    "strict": true,
-    "trailing": true,
-    "smarttabs": true,
-    "browser": true,
-    "mocha": true,
-    "globals": {
-      "sails": true,
-      "atom": true
-    }
-  },
   "dependencies": {
     "async": "^1.4.2",
     "bluebird": "^2.10.2",
