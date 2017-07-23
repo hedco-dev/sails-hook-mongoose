@@ -7,7 +7,7 @@ module.exports = function(sails) {
   let mongoose     = require('mongoose');
   let path         = require('path');
   let db           = mongoose.connection;
-  let Schema       = global.Schema = mongoose.Schema;  
+  let Schema       = global.Schema = mongoose.Schema;
   mongoose.Promise = require('bluebird');
 
 
@@ -53,7 +53,15 @@ module.exports = function(sails) {
       if (sails.config.connections && sails.config.models &&
         sails.config.models.connection &&
         sails.config.connections[sails.config.models.connection].url) {
-        mongoose.connect(sails.config.connections[sails.config.models.connection].url);
+
+        var optionsEnabled = sails.config.connections[sails.config.models.connection].options && sails.config.connections[sails.config.models.connection].options.enabled;
+        var options = {};
+
+        if(optionsEnabled) {
+          options = sails.config.connections[sails.config.models.connection].options;
+        }
+
+        mongoose.connect(sails.config.connections[sails.config.models.connection].url, options);
         db.on('error', function(err){
           cb(err);
         });
