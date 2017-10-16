@@ -2,81 +2,82 @@
 
 module.exports = function(sails) {
 
-  let async        = require('async');
-  let utils        = require('./utils.js');
-  let mongoose     = require('mongoose');
-  let path         = require('path');
-  let db           = mongoose.connection;
-  let Schema       = global.Schema = mongoose.Schema;
-  mongoose.Promise = require('bluebird');
+    let async = require('async');
+    let utils = require('./utils.js');
+    let mongoose = require('mongoose');
+    let path = require('path');
+    let db = mongoose.connection;
+    let Schema = global.Schema = mongoose.Schema;
+    mongoose.Promise = require('bluebird');
 
 
-  Schema.createObjectId = function() {
-    return mongoose.Types.ObjectId();
-  };
+    Schema.createObjectId = function() {
+        return mongoose.Types.ObjectId();
+    };
 
-  Schema.castToObjectId = function(stringObjectid) {
-    return mongoose.Types.ObjectId(stringObjectid);
-  };
+    Schema.castToObjectId = function(stringObjectid) {
+        return mongoose.Types.ObjectId(stringObjectid);
+    };
 
-  let hook          = {
-    defaults: {
+    let hook = {
+        defaults: {
 
-      models: {
-        connection: 'localMongoDb'
-      },
+            models: {
+                connection: 'localMongoDb'
+            },
 
-      connections: {
-        localMongoDb: {
-          // url: 'mongodb://localhost:27017/testDb'
+            connections: {
+                localMongoDb: {
+                    // url: 'mongodb://localhost:27017/testDb'
+                }
+            }
+        },
+        configure: function() {
+            sails.once('lower', hook.teardown);
+        },
+        initialize: function(cb) {
+            var modelPath = path.join(sails.config.appPath, 'api', 'models');
+            let modelDefinitions = utils.loadModules(modelPath);
+
+            if (!sails.models) {
+                sails.models = {};
+            }
+
+            utils.clean(mongoose);
+
+            async.forEachOf(modelDefinitions, function(modelDefinition, modelName, next) {
+                global[modelName] = sails.models[modelName] = utils.createModel(modelDefinition, modelName, mongoose, Schema);
+                next();
+            });
+
+            if (sails.config.connections && sails.config.models &&
+                sails.config.models.connection &&
+                sails.config.connections[sails.config.models.connection].url) {
+
+                var optionsEnabled = sails.config.connections[sails.config.models.connection].options && sails.config.connections[sails.config.models.connection].options.enabled;
+                var options = {};
+
+                if (optionsEnabled) {
+                    options = sails.config.connections[sails.config.models.connection].options;
+                    delete options["enabled"];
+                }
+
+                mongoose.connect(sails.config.connections[sails.config.models.connection].url, options);
+                db.on('error', function(err) {
+                    cb(err);
+                });
+
+                db.once('open', function() {
+                    cb();
+                });
+            } else {
+                cb(new Error('Can not find a connection to the mongo db'));
+            }
+        },
+        teardown: function() {
+            db.close();
         }
-      }
-    },
-    configure: function() {
-      sails.once('lower', hook.teardown);
-    },
-    initialize: function(cb) {
-      var modelPath = path.join(sails.config.appPath, 'api', 'models');
-      let modelDefinitions = utils.loadModules(modelPath);
+    };
 
-      if(!sails.models) {
-        sails.models = {};
-      }
-
-      utils.clean(mongoose);
-
-      async.forEachOf(modelDefinitions, function(modelDefinition, modelName, next){
-        global[modelName] = sails.models[modelName] = utils.createModel(modelDefinition, modelName, mongoose, Schema);
-        next();
-      });
-
-      if (sails.config.connections && sails.config.models &&
-        sails.config.models.connection &&
-        sails.config.connections[sails.config.models.connection].url) {
-
-        var optionsEnabled = sails.config.connections[sails.config.models.connection].options && sails.config.connections[sails.config.models.connection].options.enabled;
-        var options = {};
-
-        if(optionsEnabled) {
-          options = sails.config.connections[sails.config.models.connection].options;
-        }
-
-        mongoose.connect(sails.config.connections[sails.config.models.connection].url, options);
-        db.on('error', function(err){
-          cb(err);
-        });
-
-        db.once('open', function () {
-          cb();
-        });
-      } else {
-        cb(new Error('Can not find a connection to the mongo db'));
-      }
-    },
-    teardown: function() {
-      db.close();
-    }
-  };
-
-  return hook;
+    return hook;
 };
